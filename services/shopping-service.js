@@ -1,7 +1,6 @@
 const ShoppingRepository = require("../database/repository/shopping-repository");
 const { FormatData } = require("../utils/");
 const Cart = require('../database/models/Cart');
-// All Business logic will be here
 class ShoppingService {
   constructor() {
     this.repository = new ShoppingRepository();
@@ -12,12 +11,11 @@ class ShoppingService {
     return FormatData(cartItems);
   }
 
-  async PlaceOrder(userInput) {
-    const { _id } = userInput;
+  async PlaceOrder(_id) {
+ 
+    const {orderResult,productDetails} = await this.repository.CreateNewOrder(_id);
 
-    const orderResult = await this.repository.CreateNewOrder(_id);
-
-    return FormatData(orderResult);
+    return FormatData({orderResult,productDetails});
   }
 
   async GetOrders(customerId) {
@@ -30,12 +28,12 @@ class ShoppingService {
     return FormatData(orders);
   }
 
-  async ManageCart(customerId, item, qty, isRemove) {
+  async ManageCart(customerId, item, amount, isRemove) {
     
     const cartResult = await this.repository.AddCartItem(
       customerId,
       item,
-      qty,
+      amount,
       isRemove
     );
     return FormatData(cartResult);
@@ -44,17 +42,15 @@ class ShoppingService {
   async SubscribeEvents(payload) {
     payload = JSON.parse(payload);
     const { event, data } = payload;
-    const { userId, product, qty } = data;
+    const { userId, product ,amount} = data;
+console.log('SUBSCRIBE EVENTS FROM SHOPPING SERVICE',data)
 
     switch (event) {
       case "ADD_TO_CART":
-        this.ManageCart(userId, product, qty, false);
+        this.ManageCart(userId, product, amount, false);
         break;
       case "REMOVE_FROM_CART":
-        this.ManageCart(userId, product, qty, true);
-        break;
-      case "Test":
-        console.log("testinngggg");
+        this.ManageCart(userId, product, amount, true);
         break;
       default:
         console.log('this event is not valid')
@@ -74,6 +70,18 @@ class ShoppingService {
       return FormatData({ error: "No Order Available" });
     }
   }
+  async GetProductPayload(productDetails, event) {
+
+      const payload = {
+        event: event,
+        data: 
+          productDetails
+        ,
+      };
+
+      return payload;
+    
+  }
 
   async GetNotificationPayload(userEmail, order, event) {
     if (order) {
@@ -87,6 +95,7 @@ class ShoppingService {
       return FormatData({ error: "No Order Available" });
     }
   }
+
 
 }
 

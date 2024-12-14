@@ -24,7 +24,7 @@ class ShoppingRepository {
         return []
     }
 
-    async AddCartItem(customerId,item,qty,isRemove){
+    async AddCartItem(customerId,item,amount,isRemove){
  
 
             const cart = await Cart.findOne({ customerId: customerId })
@@ -45,7 +45,7 @@ class ShoppingRepository {
                             if(isRemove){
                                 cartItems.splice(cartItems.indexOf(item), 1);
                              }else{
-                               item.unit = qty;
+                               item.amount = amount;
                             }
                              isExist = true;
                         }
@@ -53,10 +53,11 @@ class ShoppingRepository {
                 } 
                 
                 if(!isExist && !isRemove){
-                    cartItems.push({product: { ...item}, unit: qty });
+                    cartItems.push({product: { ...item}, amount });
                 }
 
                 cart.items = cartItems;
+                console.log('IN MANAGE CART FUNCTION',cart.items)
 
                 return await cart.save()
  
@@ -64,57 +65,55 @@ class ShoppingRepository {
 
                return await Cart.create({
                     customerId,
-                    items:[{product: { ...item}, unit: qty }]
+                    items:[{product: { ...item}, stock: amount }]
                 })
             }
 
         
     }
  
-    async CreateNewOrder(customerId){
-
-        const cart = await Cart.findOne({ customerId: customerId })
-
-        if(cart){         
-            
-            let amount = 0;   
-
-            let cartItems = cart.items;
-
-            if(cartItems.length > 0){
-                //process Order
-                
-                cartItems.map(item => {
-                    
-                    amount += parseFloat(item.product.price) *  parseInt(item.unit);   
-                });
-    
-                const orderId = uuidv4();
-    
-                const order = new Order({
-                    orderId,
-                    customerId,
-                    amount,
-                    status: 'received',
-                    items: cartItems
-                })
-    
-                cart.items = [];
-                
-                const orderResult = await order.save();
-                await cart.save();
-                return orderResult;
-
-
-            }
-
- 
-
+    async CreateNewOrder(customerId) {
+        const cart = await Cart.findOne({ customerId });
+        
+        if (!cart || cart.items.length === 0) {
+            return {}; 
         }
+    
+        let totalAmount = 0;
+        const orderItems = [];
+        let productDetails = []; 
 
-        return {}
+        cart.items.forEach((item) => {
+            
+            const itemTotal = parseFloat(item.product.price) * parseInt(item.amount);
+            totalAmount += itemTotal;
+            totalAmount = parseFloat(totalAmount.toFixed(2));
+            orderItems.push(item);
+            productDetails.push({
+                productId: item.product._id,
+                productAmountBought: item.amount,
+            });
+        });
+    
+        const orderId = uuidv4();
+        const order = new Order({
+            orderId,
+            customerId,
+            amount: totalAmount,
+            status: 'received',
+            items: orderItems,
+        });
+    
+        // cart.items = []; 
+    
+        const orderResult = await order.save();
+        await cart.save();
+ 
+        return {
+            orderResult,
+            productDetails,
+        };
     }
-
 }
 
 module.exports = ShoppingRepository;
