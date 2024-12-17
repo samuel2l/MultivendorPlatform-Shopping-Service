@@ -3,7 +3,6 @@ const app = express();
 const mongoose = require("mongoose");
 const print = console.log;
 const cors = require("cors");
-const appEvents = require('./api/app-events'); 
 const shoppingRoutes = require("./api/shopping");
 app.use(express.json());
 app.use(cors());
@@ -24,7 +23,6 @@ async function startApp() {
     
 
     shoppingRoutes(app, channel);
-    // appEvents(app);
     app.listen(8003, () => {
       console.log("Customer is Listening to Port 8003");
     });
