@@ -8,8 +8,7 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(__dirname + "/public"));
 
-const { CreateChannel, SubscribeMessage } = require("./utils");
-
+const { CreateChannel} = require("./utils");
 require("dotenv").config();
 app.use(express.urlencoded({ extended: true }));
 
@@ -24,7 +23,7 @@ async function startApp() {
 
     shoppingRoutes(app, channel);
     app.listen(8003, () => {
-      console.log("Customer is Listening to Port 8003");
+      console.log("Order Service is Listening to Port 8003");
     });
   } catch (err) {
     console.log("Failed to start app:", err);

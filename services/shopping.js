@@ -8,9 +8,6 @@ shoppingRoutes = (app, channel) => {
     const service = new ShoppingService();
 
     SubscribeMessage(channel, service)
-    app.get('/',(req,res)=>{
-        res.send('home')
-    })
 
     app.post('/order',auth, async (req,res,next) => {
 
@@ -20,12 +17,6 @@ shoppingRoutes = (app, channel) => {
         
         const payload = await service.GetOrderPayload(_id, data, 'CREATE_ORDER')
         const notificationPayload = await service.GetNotificationPayload(req.user.email, data, 'SEND_CHECKOUT_CONFIRMATION_MAIL')
-       
-        // orderId,
-        // customerId,
-        // amount,
-        // status: 'received',
-        // items: cartItems
         PublishMessage(channel,process.env.CUSTOMER_BINDING_KEY, JSON.stringify(payload))
         PublishMessage(channel,process.env.NOTIFICATION_BINDING_KEY, JSON.stringify(notificationPayload))
 
