@@ -3,7 +3,10 @@ const app = express();
 const mongoose = require("mongoose");
 const print = console.log;
 const cors = require("cors");
+
 const shoppingRoutes = require("./api/shopping");
+const port = process.env.PORT || 4000
+
 app.use(express.json());
 app.use(cors());
 app.use(express.static(__dirname + "/public"));
@@ -22,8 +25,8 @@ async function startApp() {
     
 
     shoppingRoutes(app, channel);
-    app.listen(8003, () => {
-      console.log("Order Service is Listening to Port 8003");
+    app.listen(port, () => {
+      console.log(`Order Service is Listening to Port ${port}`);
     });
   } catch (err) {
     console.log("Failed to start app:", err);
