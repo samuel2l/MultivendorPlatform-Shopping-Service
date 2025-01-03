@@ -5,7 +5,7 @@ const print = console.log;
 const cors = require("cors");
 
 const shoppingRoutes = require("./api/shopping");
-const port = process.env.PORT || 4000
+const port = process.env.PORT || 8003
 
 app.use(express.json());
 app.use(cors());
