@@ -8,13 +8,13 @@ const shoppingRoutes = require("./api/shopping");
 const port = process.env.PORT || 8003
 
 app.use(express.json());
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://multivendorplatform-shopping-frontend.onrender.com'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-// efefe
+app.use(cors());
+// app.use(cors({
+//   origin: ['http://localhost:3000', 'https://multivendorplatform-shopping-frontend.onrender.com'],
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }))
 app.use(express.static(__dirname + "/public"));
 
 const { CreateChannel} = require("./utils");
