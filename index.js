@@ -14,6 +14,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+// efefe
 app.use(express.static(__dirname + "/public"));
 
 const { CreateChannel} = require("./utils");
