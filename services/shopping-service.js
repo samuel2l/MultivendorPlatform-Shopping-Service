@@ -41,10 +41,11 @@ class ShoppingService {
 
   async SubscribeEvents(payload) {
     payload = JSON.parse(payload);
+    console.log("INSIDE SHOPPPINGGG SERVICEEE")
     const { event, data } = payload;
     const { userId, product ,amount} = data;
 console.log('SUBSCRIBE EVENTS FROM SHOPPING SERVICE',data)
-
+console.log("destructured data??????",userId,product,amount)
     switch (event) {
       case "ADD_TO_CART":
         this.ManageCart(userId, product, amount, false);

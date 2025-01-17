@@ -10,17 +10,20 @@ const OrderSchema = new Schema({
     items: [
         {   
             product: {
-                _id: { type: String, require: true},
+                _id: { type: String, require: true },
                 name: { type: String },
                 desc: { type: String },
-                banner: { type: String },
+                img:{type:String},
                 type: { type: String },
-                unit: { type: Number },
+                stock: { type: Number },
                 price: { type: Number },
-                supplier: { type: String },
-            } ,
-            unit: { type: Number, require: true} 
-        }
+                available:{
+        type:Boolean,default:true
+                },
+                seller: { type: String },
+              },
+              amount: { type: Number, require: true },
+                }
     ]
 },
 {

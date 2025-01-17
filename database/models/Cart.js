@@ -14,6 +14,9 @@ const CartSchema = new Schema({
         type: { type: String },
         stock: { type: Number },
         price: { type: Number },
+        available:{
+type:Boolean,default:true
+        },
         seller: { type: String },
       },
       amount: { type: Number, require: true },
