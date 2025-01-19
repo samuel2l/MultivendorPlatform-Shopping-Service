@@ -39,6 +39,17 @@ class ShoppingService {
     return FormatData(cartResult);
   }
 
+  async EditWishlist(customerId, item, amount, isRemove) {
+    
+    const wishlistResult = await this.repository.AddWishlistItem(
+      customerId,
+      item,
+      amount,
+      isRemove
+    );
+    return FormatData(wishlistResult);
+  }
+
   async SubscribeEvents(payload) {
     payload = JSON.parse(payload);
     console.log("INSIDE SHOPPPINGGG SERVICEEE")
@@ -53,7 +64,15 @@ console.log("destructured data??????",userId,product,amount)
       case "REMOVE_FROM_CART":
         this.ManageCart(userId, product, amount, true);
         break;
-      default:
+        case "ADD_TO_WISHLIST":
+          this.EditWishlist(userId, product, amount, false);
+          break;
+        case "REMOVE_FROM_WISHLIST":
+          this.EditWishlist(userId, product, amount, true);
+          break;
+  
+        default:
+        console.log("the unavailable event is ",event)
         console.log('this event is not valid')
         break;
     }
