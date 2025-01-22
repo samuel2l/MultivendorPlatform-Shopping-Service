@@ -1,6 +1,7 @@
 const ShoppingRepository = require("../database/repository/shopping-repository");
 const { FormatData } = require("../utils/");
 const Cart = require('../database/models/Cart');
+let print=console.log
 class ShoppingService {
   constructor() {
     this.repository = new ShoppingRepository();
@@ -54,27 +55,35 @@ class ShoppingService {
     payload = JSON.parse(payload);
     console.log("INSIDE SHOPPPINGGG SERVICEEE")
     const { event, data } = payload;
-    const { userId, product ,amount} = data;
-console.log('SUBSCRIBE EVENTS FROM SHOPPING SERVICE',data)
-console.log("destructured data??????",userId,product,amount)
-    switch (event) {
-      case "ADD_TO_CART":
-        this.ManageCart(userId, product, amount, false);
-        break;
-      case "REMOVE_FROM_CART":
-        this.ManageCart(userId, product, amount, true);
-        break;
-        case "ADD_TO_WISHLIST":
-          this.EditWishlist(userId, product, amount, false);
-          break;
-        case "REMOVE_FROM_WISHLIST":
-          this.EditWishlist(userId, product, amount, true);
-          break;
-  
-        default:
-        console.log("the unavailable event is ",event)
-        console.log('this event is not valid')
-        break;
+    console.log("EVENT X DATA CAUSING ERROR",event,data)
+    if(data!==undefined){
+      const { userId, product ,amount} = data;
+      console.log('SUBSCRIBE EVENTS FROM SHOPPING SERVICE',data)
+      //s
+      console.log("destructured data??????",userId,product,amount)
+          switch (event) {
+            case "ADD_TO_CART":
+{
+  const { userId, product ,amount,isRemove} = data; 
+                this.ManageCart(userId, product, amount, isRemove);
+                break;
+              } 
+            case "REMOVE_FROM_CART":
+              this.ManageCart(userId, product, amount, true);
+              break;
+              case "ADD_TO_WISHLIST":
+                this.EditWishlist(userId, product, amount, false);
+                break;
+              case "REMOVE_FROM_WISHLIST":
+                this.EditWishlist(userId, product, amount, true);
+                break;
+        
+              default:
+              console.log("the unavailable event is ",event)
+              console.log('this event is not valid')
+              break;
+          }
+      
     }
   }
 

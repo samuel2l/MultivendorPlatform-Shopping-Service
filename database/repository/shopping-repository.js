@@ -78,6 +78,10 @@ class ShoppingRepository {
 
             const cart = await Cart.findOne({ customerId: customerId })
 
+            if(cart==[]){
+                return []
+            }
+
             const { _id } = item;
 
             if(cart){

@@ -36,12 +36,16 @@ shoppingRoutes = (app, channel) => {
 
     });
 
+// Aggregation in MongoDB is like a pipeline where data flows through multiple stages. Each stage performs a specific operation, such as filtering, reshaping, or transforming the data, and then passes the results to the next stage.
+// Reshape documents to include/exclude specific fields.
+// further Reshape documents to include only the product and amount fields as that is all we really need to sidplay the sellers sales you barb.
+
     app.get('/seller-sales',isSeller, async (req,res,next) => {
 
         try {
             const sellerId = req.user._id;
             console.log("In seller sales route", sellerId);
-            // Aggregation in MongoDB is like a pipeline where data flows through multiple stages. Each stage performs a specific operation, such as filtering, reshaping, or transforming the data, and then passes the results to the next stage.
+
             const sales = await Order.aggregate([
               {
                 $match: {
@@ -49,7 +53,6 @@ shoppingRoutes = (app, channel) => {
                 }
               },
               {
-                // Reshape documents to include/exclude specific fields.
                 $project: {
                   items: {
                     $filter: {
@@ -60,7 +63,6 @@ shoppingRoutes = (app, channel) => {
                   }
                 }
               },
-                // further Reshape documents to include only the product and amount fields as that is all we really need to sidplay the sellers sales you barb.
                 {
                 $project: {
                   "items.product": 1,
