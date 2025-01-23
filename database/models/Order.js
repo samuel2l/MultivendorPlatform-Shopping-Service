@@ -27,6 +27,7 @@ const OrderSchema = new Schema({
     ]
 },
 {
+    optimisticConcurrency: true,
     toJSON: {
         transform(doc, ret){
             delete ret.__v;

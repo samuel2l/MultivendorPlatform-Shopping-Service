@@ -2,7 +2,7 @@ const Order = require('../models/Order');
 
 const Cart = require('../models/Cart');
 const Wishlist = require('../models/Wishlist');
-
+let print=console.log
 const { v4: uuidv4 } = require('uuid');
 
 class ShoppingRepository {
@@ -65,7 +65,7 @@ class ShoppingRepository {
 
            return await Wishlist.create({
                 customerId,
-                items:[{product: { ...item}, stock: amount }]
+                items:[{product: { ...item}, amount: amount }]
             })
         }
 
@@ -76,7 +76,9 @@ class ShoppingRepository {
     async AddCartItem(customerId,item,amount,isRemove){
  
 
-            const cart = await Cart.findOne({ customerId: customerId })
+            const cart = await Cart.findOne({ customerId })
+            print("ADD CART ITEM FUNC",cart)
+
 
             if(cart==[]){
                 return []
@@ -118,7 +120,7 @@ class ShoppingRepository {
 
                return await Cart.create({
                     customerId,
-                    items:[{product: { ...item}, stock: amount }]
+                    items:[{product: { ...item}, amount }]
                 })
             }
 
