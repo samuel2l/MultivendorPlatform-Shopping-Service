@@ -45,7 +45,7 @@ class ShoppingRepository {
       }
 
       if (!isExist && !isRemove) {
-        wishlistItems.push({ product: { ...item }, amount });
+        wishlistItems.push({ product: { ...item,img:item.img[0] }, amount });
       }
 
       wishlist.items = wishlistItems;
@@ -55,7 +55,7 @@ class ShoppingRepository {
     } else {
       return await Wishlist.create({
         customerId,
-        items: [{ product: { ...item }, amount: amount }],
+        items: [{ product: { ...item,img:item.img[0] }, amount: amount }],
       });
     }
   }
@@ -89,7 +89,7 @@ class ShoppingRepository {
       }
 
       if (!isExist && !isRemove) {
-        cartItems.push({ product: { ...item }, amount });
+        cartItems.push({ product: { ...item,img:item.img[0] }, amount });
       }
 
       cart.items = cartItems;
@@ -99,7 +99,7 @@ class ShoppingRepository {
     } else {
       return await Cart.create({
         customerId,
-        items: [{ product: { ...item }, amount }],
+        items: [{ product: { ...item,img:item.img[0] }, amount }],
       });
     }
   }
@@ -147,8 +147,8 @@ class ShoppingRepository {
         orderResults.push(orderResult);
     }
 
-    // cart.items = [];
-    // await cart.save();
+    cart.items = [];
+    await cart.save();
 
     return {
       orderResults,

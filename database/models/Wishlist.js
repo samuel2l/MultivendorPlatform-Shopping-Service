@@ -11,7 +11,7 @@ const WishlistSchema = new Schema({
         name: { type: String },
         desc: { type: String },
         img:{type:String},
-        type: { type: String },
+        type: { type: [String] },
         stock: { type: Number },
         price: { type: Number },
         available:{
@@ -76,7 +76,7 @@ type:Boolean,default:true
     },
   ],
 },{
-  optimisticConcurrency: true,
+
 
 });
 
