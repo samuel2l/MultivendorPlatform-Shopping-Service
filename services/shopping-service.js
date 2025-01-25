@@ -13,10 +13,10 @@ class ShoppingService {
   }
 
   async PlaceOrder(_id) {
-    const { orderResult, productDetails } =
+    const { orderResults, productDetails } =
       await this.repository.CreateNewOrder(_id);
 
-    return FormatData({ orderResult, productDetails });
+    return FormatData({ orderResults, productDetails });
   }
 
   async GetOrders(customerId) {

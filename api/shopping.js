@@ -3,19 +3,22 @@ const { SubscribeMessage } = require("../utils");
 const  {auth,isSeller} = require('./middleware/auth');
 const { PublishMessage } = require('../utils')
 const Order=require("../database/models/Order")
+const print=console.log
 shoppingRoutes = (app, channel) => {
     
     const service = new ShoppingService();
 
     SubscribeMessage(channel, service)
 
+    //PLACE AN ORDER ROUTE
     app.post('/order',auth, async (req,res,next) => {
 
         const { _id } = req.user;
  
         const { data } = await service.PlaceOrder(_id);
-        const payload = await service.GetOrderPayload(_id, data.orderResult, 'CREATE_ORDER')
-        const notificationPayload = await service.GetNotificationPayload(req.user.email, data.orderResult, 'SEND_CHECKOUT_CONFIRMATION_MAIL')
+        print("data being sent as payload",data)
+        const payload = await service.GetOrderPayload(_id, data.orderResults, 'CREATE_ORDER')
+        const notificationPayload = await service.GetNotificationPayload(req.user.email, data.orderResults, 'SEND_CHECKOUT_CONFIRMATION_MAIL')
         const productPayload = await service.GetProductPayload( data.productDetails, 'REDUCE_PRODUCT_STOCK')
         
         PublishMessage(channel,process.env.CUSTOMER_BINDING_KEY, JSON.stringify(payload))
@@ -25,6 +28,7 @@ shoppingRoutes = (app, channel) => {
         res.status(200).json(data);
 
     });
+    //GET ALL YOUR PREVIOUS ORDERS
 
     app.get('/orders',auth, async (req,res,next) => {
         
@@ -35,16 +39,11 @@ shoppingRoutes = (app, channel) => {
         res.status(200).json(data);
 
     });
-
-// Aggregation in MongoDB is like a pipeline where data flows through multiple stages. Each stage performs a specific operation, such as filtering, reshaping, or transforming the data, and then passes the results to the next stage.
-// Reshape documents to include/exclude specific fields.
-// further Reshape documents to include only the product and amount fields as that is all we really need to sidplay the sellers sales you barb.
-
+// A SELLER CAN SEE ALL PRODUCTS SOLD USING THIS ROUTE
     app.get('/seller-sales',isSeller, async (req,res,next) => {
 
         try {
             const sellerId = req.user._id;
-            console.log("In seller sales route", sellerId);
 
             const sales = await Order.aggregate([
               {
@@ -52,23 +51,17 @@ shoppingRoutes = (app, channel) => {
                   "items.product.seller": sellerId
                 }
               },
-              {
-                $project: {
-                  items: {
-                    $filter: {
-                      input: "$items",
-                      as: "item",
-                      cond: { $eq: ["$$item.product.seller", sellerId] }
-                    }
-                  }
-                }
-              },
-                {
-                $project: {
-                  "items.product": 1,
-                  "items.amount": 1
-                }
-              }
+              //   {
+              //   $project: {
+              //     "orderId":1,
+              //     "status":1,
+              //     "customerId":1,
+              //     "items.product": 1,
+              //     "items.amount": 1,
+              //     "amount":1,
+              //     "createdAt":1,
+              //   }
+              // } 
             ]);
         
             console.log("Seller sales for ID:", sellerId, "Sales:", sales);
@@ -79,7 +72,32 @@ shoppingRoutes = (app, channel) => {
           }
     });
 
+    //EDIT STATUS OF AN ORDER 
+    app.put('/sales/:orderId',isSeller, async (req,res,next) => {
 
+      try {
+          const sellerId = req.user._id;
+         const order= await Order.findOne({orderId:req.params.orderId})
+         print("ORDER",order)
+         if (order.items[0].product.seller==sellerId){
+          const {status='received'}=req.body
+          order.status=status
+          const updatedOrder=await order.save()
+          
+          res.status(200).json(updatedOrder);
+
+         }else{
+          res.status(403).json({error:"Ah chale its not your order you want change am? mtch"})
+         }
+        } catch (error) {
+          console.error("Error in /seller-sales:", error);
+          res.status(500).json({ error: "Something went wrong!" });
+        }
+
+      });
+
+//ADD TO CART. THIS SAME ROUTE IS USED TO BOTH ADD AND REMOVE FROM CART
+//TO USE THIS ROUTE YOU NEED TO ADD AN ISREMOVE PROPRTY SET TO TRUE IF YOU ARE REMOVING FROM CART
     app.put('/cart',auth, async (req,res,next) => {
 
         const { _id } = req.user;
@@ -95,6 +113,8 @@ shoppingRoutes = (app, channel) => {
         const { _id } = req.user;
         
         const { data } = await service.GetCart({ _id });
+
+
 
         return res.status(200).json(data);
     });
