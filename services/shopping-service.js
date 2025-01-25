@@ -1,6 +1,7 @@
 const ShoppingRepository = require("../database/repository/shopping-repository");
 const { FormatData } = require("../utils/");
 const Cart = require("../database/models/Cart");
+const Wishlist = require("../database/models/Wishlist");
 let print = console.log;
 class ShoppingService {
   constructor() {
@@ -48,7 +49,66 @@ class ShoppingService {
     );
     return FormatData(wishlistResult);
   }
+  async updateCart(productId, name, desc, img, type, stock, price, available) {
+    const carts = await Cart.find({ "items.product._id": productId });
+    print("carts", carts);
+    for (const cart of carts) {
+      cart.items = cart.items.map((item) => {
+        if (item.product._id == productId) {
+          print("ITEM HAS PRODUCT ID UPDATED??", item);
+          return {
+            ...item,
+            product: {
+              ...item.product,
+              name,
+              desc,
+              img,
+              stock,
+              price,
+              available,
+            },
+          };
+ 
+        }
+        
+        return item
+      });
+      
+      await cart.save()
+    }
+  }
 
+  async updateWishlist(productId, name, desc, img, type, stock, price, available) {
+    const wishlists = await Wishlist.find({ "items.product._id": productId });
+    print("wishlists", wishlists);
+    for (const wishlist of wishlists) {
+      wishlist.items = wishlist.items.map((item) => {
+        if (item.product._id == productId) {
+          print("ITEM HAS PRODUCT ID UPDATED??", item);
+          return {
+            ...item,
+            product: {
+              ...item.product,
+              name,
+              desc,
+              img,
+              stock,
+              price,
+              available,
+            },
+          };
+ 
+        }
+        
+        return item
+      });
+      
+      await wishlist.save()
+    }
+  }
+
+
+  async updateWishlist() {}
   async SubscribeEvents(payload) {
     payload = JSON.parse(payload);
     console.log("INSIDE SHOPPPINGGG SERVICEEE");
@@ -62,7 +122,7 @@ class ShoppingService {
       switch (event) {
         case "ADD_TO_CART": {
           const { userId, product, amount, isRemove } = data;
-          print("RECEIVED DATA ADD TO CART",userId,product,amount,isRemove)
+          print("RECEIVED DATA ADD TO CART", userId, product, amount, isRemove);
           this.ManageCart(userId, product, amount, isRemove);
           break;
         }
@@ -74,6 +134,31 @@ class ShoppingService {
           break;
         case "REMOVE_FROM_WISHLIST":
           this.EditWishlist(userId, product, amount, true);
+          break;
+        case "UPDATE_CART_PRODUCT":
+          {
+            print("received data in update cart event", data);
+            await this.updateCart(
+              data.productId,
+              data.name,
+              data.desc,
+              data.img,
+              data.type,
+              data.stock,
+              data.price,
+              data.available
+            );
+            await this.updateWishlist(
+              data.productId,
+              data.name,
+              data.desc,
+              data.img,
+              data.type,
+              data.stock,
+              data.price,
+              data.available
+            );
+          }
           break;
 
         default:
