@@ -2,6 +2,8 @@ const ShoppingRepository = require("../database/repository/shopping-repository")
 const { FormatData } = require("../utils/");
 const Cart = require("../database/models/Cart");
 const Wishlist = require("../database/models/Wishlist");
+const { CreateChannel, PublishMessage } = require("../utils");
+
 let print = console.log;
 class ShoppingService {
   constructor() {
@@ -50,12 +52,18 @@ class ShoppingService {
     return FormatData(wishlistResult);
   }
   async updateCart(productId, name, desc, img, type, stock, price, available) {
+    print("h so the prd????", productId);
     const carts = await Cart.find({ "items.product._id": productId });
+
     print("carts", carts);
+    let userIds = [];
+    const channel = await CreateChannel();
+
     for (const cart of carts) {
+      userIds.push(cart.customerId.toString());
+
       cart.items = cart.items.map((item) => {
         if (item.product._id == productId) {
-          print("ITEM HAS PRODUCT ID UPDATED??", item);
           return {
             ...item,
             product: {
@@ -63,25 +71,69 @@ class ShoppingService {
               name,
               desc,
               img,
+              type,
               stock,
               price,
               available,
             },
           };
- 
         }
-        
-        return item
+
+        return item;
       });
-      
-      await cart.save()
+
+      const updatedCart = await Cart.findOneAndUpdate(
+        { _id: cart._id }, 
+        { $set: { items: cart.items } }, 
+        { new: true, runValidators: true }
+      );
+
+    }
+    let payload = {};
+    print("IDS OF USERS", userIds);
+    if (userIds.length !== 0) {
+      payload = {
+        event: "GET_USER_EMAILS",
+        data: {
+          userIds: userIds,
+          product: {
+            productId,
+            name,
+            desc,
+            img,
+            type,
+            stock,
+            price,
+            available,
+          },
+        },
+      };
+      print("PAYLOAD BEING SENT", payload);
+      PublishMessage(
+        channel,
+        process.env.CUSTOMER_BINDING_KEY,
+        JSON.stringify(payload)
+      );
     }
   }
 
-  async updateWishlist(productId, name, desc, img, type, stock, price, available) {
+  async updateWishlist(
+    productId,
+    name,
+    desc,
+    img,
+    type,
+    stock,
+    price,
+    available
+  ) {
     const wishlists = await Wishlist.find({ "items.product._id": productId });
+    const channel = await CreateChannel();
+
     print("wishlists", wishlists);
+    let userIds = [];
     for (const wishlist of wishlists) {
+      userIds.push(wishlist._id);
       wishlist.items = wishlist.items.map((item) => {
         if (item.product._id == productId) {
           print("ITEM HAS PRODUCT ID UPDATED??", item);
@@ -92,18 +144,48 @@ class ShoppingService {
               name,
               desc,
               img,
+              type,
               stock,
               price,
               available,
             },
           };
- 
         }
-        
-        return item
+
+        return item;
       });
-      
-      await wishlist.save()
+
+      const updatedWishlist = await Wishlist.findOneAndUpdate(
+        { _id: wishlist._id },
+        { $set: { items: wishlist.items } },
+        { new: true, runValidators: true }
+      );
+    }
+    print("AH user ids ", userIds);
+    let payload = {};
+    if (userIds.length !== 0) {
+      payload = {
+        event: "GET_USER_EMAILS",
+        data: {
+          userIds: userIds,
+          product: {
+            productId,
+            name,
+            desc,
+            img,
+            type,
+            stock,
+            price,
+            available,
+          },
+        },
+      };
+      print("PAYLOAD BEING SENT", payload);
+      PublishMessage(
+        channel,
+        process.env.CUSTOMER_BINDING_KEY,
+        JSON.stringify(payload)
+      );
     }
   }
   async GetOrderPayload(userId, order, event) {
@@ -161,6 +243,7 @@ class ShoppingService {
           this.ManageCart(userId, product, amount, true);
           break;
         case "ADD_TO_WISHLIST":
+          print("ADD TO WISHLIST?????????????")
           this.EditWishlist(userId, product, amount, false);
           break;
         case "REMOVE_FROM_WISHLIST":
@@ -199,7 +282,6 @@ class ShoppingService {
       }
     }
   }
-
 }
 
 module.exports = ShoppingService;

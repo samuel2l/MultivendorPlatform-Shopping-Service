@@ -45,17 +45,21 @@ class ShoppingRepository {
       }
 
       if (!isExist && !isRemove) {
-        wishlistItems.push({ product: { ...item,img:item.img[0] }, amount });
+        wishlistItems.push({ product: { ...item, img: item.img[0] }, amount });
       }
 
       wishlist.items = wishlistItems;
       console.log("IN MANAGE wishlist FUNCTION", wishlist.items);
 
-      return await wishlist.save();
+      return await Wishlist.findOneAndUpdate(
+        { _id: wishlist._id }, 
+        { $set: { items: wishlist.items } }, 
+        { new: true, runValidators: true }
+    );
     } else {
       return await Wishlist.create({
         customerId,
-        items: [{ product: { ...item,img:item.img[0] }, amount: amount }],
+        items: [{ product: { ...item, img: item.img[0] }, amount: amount }],
       });
     }
   }
@@ -89,17 +93,21 @@ class ShoppingRepository {
       }
 
       if (!isExist && !isRemove) {
-        cartItems.push({ product: { ...item,img:item.img[0] }, amount });
+        cartItems.push({ product: { ...item, img: item.img[0] }, amount });
       }
 
       cart.items = cartItems;
       console.log("IN MANAGE CART FUNCTION", cart.items);
 
-      return await cart.save();
+      return await Cart.findOneAndUpdate(
+        { _id: cart._id }, 
+        { $set: { items: cart.items } }, 
+        { new: true, runValidators: true }
+    );
     } else {
       return await Cart.create({
         customerId,
-        items: [{ product: { ...item,img:item.img[0] }, amount }],
+        items: [{ product: { ...item, img: item.img[0] }, amount }],
       });
     }
   }
@@ -110,7 +118,7 @@ class ShoppingRepository {
     if (!cart || cart.items.length === 0) {
       return {};
     }
-    let productDetails = []
+    let productDetails = [];
     const sellerOrders = {};
     cart.items.forEach((item) => {
       print("ITEMS OF CART.ITEMS", cart.items);
@@ -130,21 +138,20 @@ class ShoppingRepository {
       });
     });
     let orderResults = [];
-
     for (const [sellerId, orderData] of Object.entries(sellerOrders)) {
-        print("IN FOR LOOP",sellerId,orderData)
+      print("IN FOR LOOP", sellerId, orderData);
       const orderId = uuidv4();
-        print("does it even reach here")
-        const order = new Order({
-          orderId,
-          customerId,
-          amount: orderData.totalAmount,
-          status: "received",
-          items: orderData.items,
-        });
-        const orderResult = await order.save();
-        print("ah order result?",orderResult)
-        orderResults.push(orderResult);
+      print("does it even reach here");
+      const order = new Order({
+        orderId,
+        customerId,
+        amount: orderData.totalAmount,
+        status: "received",
+        items: orderData.items,
+      });
+      const orderResult = await order.save();
+      print("ah order result?", orderResult);
+      orderResults.push(orderResult);
     }
 
     cart.items = [];

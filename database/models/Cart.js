@@ -78,7 +78,7 @@ type:Boolean,default:true
   ],
 },{
 
-
+optimisticConcurrency:true
 });
 
 module.exports = mongoose.model("cart", CartSchema);
