@@ -17,6 +17,8 @@ The **Shopping Service** is a microservice designed to handle shopping-related o
   - Send order details to other services (e.g., Product and User).
 - **Interservice Communication:**
   - Leverages RabbitMQ for communication with related microservices.
+- **Payments with stripe:**
+  
 
 ---
 
