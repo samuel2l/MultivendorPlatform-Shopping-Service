@@ -17,6 +17,8 @@ The **Shopping Service** is a microservice designed to handle shopping-related o
   - Send order details to other services (e.g., Product and User).
 - **Interservice Communication:**
   - Leverages RabbitMQ for communication with related microservices.
+- **Payments with stripe:**
+  
 
 ---
 
@@ -49,6 +51,7 @@ The **Shopping Service** is a microservice designed to handle shopping-related o
         SHOPPING_BINDING_KEY=<variable to bind messages to the shopping queue. eg shoppingBindingKey>
         NOTIFICATION_BINDING_KEY= <variable to bind messages to the shopping queue. eg notificationKey>
         PRODUCT_BINDING_KEY=<<variable to bind messages to the shopping queue. eg productKey>
+        STRIPE_KEY=<your stripe key from stripe website >
 
 
 	
